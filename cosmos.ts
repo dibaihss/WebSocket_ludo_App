@@ -1,4 +1,3 @@
-import { DefaultAzureCredential, TokenCredential } from '@azure/identity';
 import { Container, CosmosClient, Database, FeedResponse, ItemResponse, SqlQuerySpec } from '@azure/cosmos';
 
 import { Emit, Product } from './types'
@@ -36,14 +35,21 @@ export class DataClient {
 
     async createContainer(emit: Emit, client: CosmosClient): Promise<Container> {
         const databaseName: string = process.env.CONFIGURATION__AZURECOSMOSDB__DATABASENAME ?? 'cosmicworks';
-        const database: Database = client.database(databaseName);
+        const { database }: { database: Database } = await client.databases.createIfNotExists({
+            id: databaseName
+        });
 
-        emit(`Get database:\t${database.id}`);
+        emit(`Database ready:\t${database.id}`);
 
         const containerName: string = process.env.CONFIGURATION__AZURECOSMOSDB__CONTAINERNAME ?? 'products';
-        const container: Container = database.container(containerName);
+        const { container }: { container: Container } = await database.containers.createIfNotExists({
+            id: containerName,
+            partitionKey: {
+                paths: ['/category']
+            }
+        });
 
-        emit(`Get container:\t${container.id}`);
+        emit(`Container ready:\t${container.id}`);
 
         return container;
     }

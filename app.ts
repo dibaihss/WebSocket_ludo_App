@@ -39,10 +39,17 @@ io.on('connection', (socket) => {
 
   socket.on('start', async (_) => {
     console.log('Started');
-    await new DataClient().start((message: string) => {
-      console.log(message);
+    try {
+      await new DataClient().start((message: string) => {
+        console.log(message);
+        io.emit('new_message', message);
+      });
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const message = `Error:\t${errorMessage}`;
+      console.error(error);
       io.emit('new_message', message);
-    });
+    }
   });
 });
 
