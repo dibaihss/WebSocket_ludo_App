@@ -14,6 +14,37 @@
         <h1 class="my-5 text-center">
             Azure Cosmos DB for NoSQL | TypeScript Quickstart
         </h1>
+        <section class="row g-3">
+            <div class="col-12">
+                <h2 class="h4">Create Product</h2>
+            </div>
+            <div class="col-md-6">
+                <label for="productCategory" class="form-label">Category</label>
+                <input id="productCategory" class="form-control" type="text" required>
+            </div>
+            <div class="col-md-6">
+                <label for="productName" class="form-label">Name</label>
+                <input id="productName" class="form-control" type="text" required>
+            </div>
+            <div class="col-md-6">
+                <label for="productQuantity" class="form-label">Quantity</label>
+                <input id="productQuantity" class="form-control" type="number" min="0" step="1" required>
+            </div>
+            <div class="col-md-6">
+                <label for="productPrice" class="form-label">Price</label>
+                <input id="productPrice" class="form-control" type="number" min="0" step="0.01" required>
+            </div>
+            <div class="col-12 form-check ms-2">
+                <input id="productClearance" class="form-check-input" type="checkbox">
+                <label for="productClearance" class="form-check-label">Clearance</label>
+            </div>
+            <div class="col-12">
+                <button id="createProductButton" class="btn btn-success" type="button">
+                    <i class="bi bi-plus-circle me-2"></i>
+                    Create Item
+                </button>
+            </div>
+        </section>
         <pre id="console" class="bg-light text-dark fw-light font-monospace mt-5 p-2">
             &#x200B;
         </pre>

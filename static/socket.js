@@ -19,4 +19,16 @@ $(function () {
         $('#console').html('&#x200B;'); // Zero-width space
         socket.emit('start', {});
     });
+
+    $('#createProductButton').click(function() {
+        const payload = {
+            category: String($('#productCategory').val() ?? ''),
+            name: String($('#productName').val() ?? ''),
+            quantity: Number($('#productQuantity').val()),
+            price: Number($('#productPrice').val()),
+            clearance: $('#productClearance').is(':checked')
+        };
+
+        socket.emit('create_item', payload);
+    });
 });

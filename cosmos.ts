@@ -1,6 +1,7 @@
 import { Container, CosmosClient, Database, FeedResponse, ItemResponse, SqlQuerySpec } from '@azure/cosmos';
+import { randomUUID } from 'node:crypto';
 
-import { Emit, Product } from './types'
+import { CreateProductInput, Emit, Product } from './types'
 
 export class DataClient {
 
@@ -116,5 +117,86 @@ export class DataClient {
             emit(`Found item:\t${item.name}\t${item.id}`);
         }
         emit(`Request charge:\t${response.requestCharge}`);
+    }
+
+    async createProduct(input: CreateProductInput, emit: Emit): Promise<Product> {
+        const client: CosmosClient = await this.createClient(emit);
+        const container: Container = await this.createContainer(emit, client);
+        const normalizedInput: CreateProductInput = this.normalizeCreateProductInput(input);
+
+        const item: Product = {
+            id: randomUUID(),
+            category: normalizedInput.category,
+            name: normalizedInput.name,
+            quantity: normalizedInput.quantity,
+            price: normalizedInput.price,
+            clearance: normalizedInput.clearance
+        };
+
+        try {
+            const { resource }: ItemResponse<Product> = await container.items.create<Product>(item);
+            if (!resource) {
+                throw new Error('Create failed: missing created resource');
+            }
+
+            return resource;
+        } catch (error) {
+            const maybeError = error as { statusCode?: number; code?: number };
+            const statusCode = maybeError?.statusCode ?? maybeError?.code;
+
+            if (statusCode === 409) {
+                throw new Error('Create failed: item id conflict');
+            }
+
+            if (error instanceof Error && error.message.startsWith('Create failed:')) {
+                throw error;
+            }
+
+            const message = error instanceof Error ? error.message : String(error);
+            throw new Error(`Create failed: ${message}`);
+        }
+    }
+
+    private normalizeCreateProductInput(input: CreateProductInput): CreateProductInput {
+        const value = input as Partial<CreateProductInput> | null | undefined;
+        const validationErrors: string[] = [];
+
+        if (!value || typeof value !== 'object') {
+            throw new Error('Validation failed: payload must be an object');
+        }
+
+        const category = typeof value.category === 'string' ? value.category.trim() : '';
+        if (!category) {
+            validationErrors.push('category must be a non-empty string');
+        }
+
+        const name = typeof value.name === 'string' ? value.name.trim() : '';
+        if (!name) {
+            validationErrors.push('name must be a non-empty string');
+        }
+
+        const quantity = Number(value.quantity);
+        if (!Number.isFinite(quantity) || !Number.isInteger(quantity) || quantity < 0) {
+            validationErrors.push('quantity must be an integer >= 0');
+        }
+
+        const price = Number(value.price);
+        if (!Number.isFinite(price) || price < 0) {
+            validationErrors.push('price must be a number >= 0');
+        }
+
+        const clearance = typeof value.clearance === 'boolean' ? value.clearance : false;
+
+        if (validationErrors.length > 0) {
+            throw new Error(`Validation failed: ${validationErrors.join('; ')}`);
+        }
+
+        return {
+            category,
+            name,
+            quantity,
+            price,
+            clearance
+        };
     }
 }
