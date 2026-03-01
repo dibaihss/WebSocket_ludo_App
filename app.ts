@@ -8,6 +8,7 @@ import rateLimit, { RateLimitRequestHandler } from 'express-rate-limit';
 import { DataClient } from './cosmos'
 import { registerCreateItemHandler } from './create-item-handler';
 import { registerMessageHandler } from './message-handler';
+import { registerSessionWebSocketHandler } from './session-websocket-handler';
 
 import 'dotenv/config'
 
@@ -56,6 +57,7 @@ io.on('connection', (socket) => {
 
   registerCreateItemHandler(socket, io);
   registerMessageHandler(socket, io);
+  registerSessionWebSocketHandler(socket, io);
 });
 
 io.on('error', (_, error) => {

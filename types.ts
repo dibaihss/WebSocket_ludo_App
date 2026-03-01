@@ -10,6 +10,22 @@ export interface CreateProductInput {
     clearance: boolean;
 }
 
+export interface SessionMsg {
+    sender?: string;
+    username?: string;
+    name?: string;
+    content?: string;
+    type?: string;
+    [key: string]: unknown;
+}
+
+export interface UserStatusMessage {
+    userId?: string;
+    username?: string;
+    status?: string;
+    [key: string]: unknown;
+}
+
 export interface Product extends ItemDefinition {
     category: string;
     name: string;
